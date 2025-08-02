@@ -1,0 +1,45 @@
+# python3 -m pip install --upgrade pip build setuptools twine
+# python3 -m build
+# # python3 -m twine upload --repository testpypi dist/*
+# # pip3 install --no-deps --index-url https://test.pypi.org/simple {package_name}
+# python3 -m twine upload dist/*
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smalk_disk_check"
+dynamic = ["version"]
+authors = [
+  { name="The220th", email="The220th@gmail.com" },
+]
+description = "smalk implementation for disk checking and monitoring."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+]
+license = "MIT"
+dependencies = [
+    "alerk_pack",
+    "ksupk",
+    "pySMART",
+    "requests",
+    "pyyaml",
+    "argparse",
+]
+
+[project.scripts]
+smalk_disk_check = "smalk_disk_check.main:main"
+
+[project.urls]
+Homepage = "https://github.com/The220th/smalk_disk_check"
+Issues = "https://github.com/The220th/smalk_disk_check/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "smalk_disk_check.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["smalk_disk_check"]

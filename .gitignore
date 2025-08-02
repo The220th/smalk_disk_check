@@ -1,0 +1,8 @@
+venv
+.venv
+.idea
+**/__pycache__
+build
+dist
+smalk_disk_check.egg-info
+set.yaml

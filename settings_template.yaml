@@ -1,0 +1,42 @@
+app:
+  notify_if_turned_on: True
+  disk_polling_rate: 3600 # 60 -- one minute, 1800 -- half an hour, 3600 -- one hour, 21600 -- six hours, 43200 -- 12 hours, 86400 -- one day, 604800 -- one week
+  full_report_period: 604800  # 86400 -- one day, 604800 -- one week, 2592000 -- one month
+
+keys:
+  priv_key: "smalk_priv_key"  # private part (alerk gen_keys)
+  pub_key: "smalk_pub_key"  # public part (alerk gen_keys)
+  sign_key: "smalk_sigh_key"  # private part (alerk gen_keys)
+  verify_key: "smalk_verify_key"  # public part (alerk gen_keys)
+
+alerk:
+  pub_key: "alerk_pub_key"
+  verify_key: "alerk_verify_key"
+  ip: "192.168.0.1"
+  port: 8000
+  endpoint: "/endpoint"
+
+#
+# define_type -- de way to find device:
+# - "dev": path to /dev folder. Then "disk" like "/dev/sdx"
+# - "uuid": uuid of any partition on disk. Then "disk" like "10f5e5ee-5544-3a88-a64a-43bb59777a8a"
+# - "by-id": path like type-manufacturer_model_serial. The "disk" like "/dev/disk/by-id/type-manufacturer_model_serial"
+# You can look it with commands:
+# - $ ls -lah /dev
+# - $ lsblk -o NAME,UUID,LABEL,MOUNTPOINTS
+# - $ ls -lah /dev/disk/by-id/
+#
+# type -- block device inf type:
+# - mdadm
+# - ata
+# - scsi
+# - nvme
+# - sat
+disk:
+  - define_type: "dev"
+    disk: "/dev/sda"
+    type: "ata"
+    max_temp: 55  # Degrees Celsius
+    smart:
+      - attribute_num: 5
+        problem_if: ">0"

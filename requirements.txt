@@ -1,0 +1,6 @@
+alerk_pack
+ksupk
+pySMART
+requests
+pyyaml
+argparse
