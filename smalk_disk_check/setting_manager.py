@@ -15,3 +15,6 @@ class SettingManager:
             data = yaml.safe_load(file)
 
         self.data: dict = dict(data)
+
+    def get_disks(self) -> list:
+        return self.data["disk"]

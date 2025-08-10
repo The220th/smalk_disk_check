@@ -1,7 +1,14 @@
 app:
+  # Send message, if app tuned on
   notify_if_turned_on: True
+
+  # How often to check faults and make a report, if necessary
   disk_polling_rate: 3600 # 60 -- one minute, 1800 -- half an hour, 3600 -- one hour, 21600 -- six hours, 43200 -- 12 hours, 86400 -- one day, 604800 -- one week
+
+  # How often to compile and send a full report on disks
   full_report_period: 604800  # 86400 -- one day, 604800 -- one week, 2592000 -- one month
+
+  cipher_key: "{YOUR_CIPHER_KEY}"  # empty if no needed to encrypt reports (you can use GUI to decrypt/test: https://github.com/The220th/krypto_gui_smalk)
 
 keys:
   priv_key: "smalk_priv_key"  # private part (alerk gen_keys)
@@ -19,12 +26,12 @@ alerk:
 #
 # define_type -- de way to find device:
 # - "dev": path to /dev folder. Then "disk" like "/dev/sdx"
-# - "uuid": uuid of any partition on disk. Then "disk" like "10f5e5ee-5544-3a88-a64a-43bb59777a8a"
 # - "by-id": path like type-manufacturer_model_serial. The "disk" like "/dev/disk/by-id/type-manufacturer_model_serial"
+# - "uuid": uuid of any partition on disk. Then "disk" like "10f5e5ee-5544-3a88-a64a-43bb59777a8a". Make sure volumes are unique.
 # You can look it with commands:
 # - $ ls -lah /dev
-# - $ lsblk -o NAME,UUID,LABEL,MOUNTPOINTS
 # - $ ls -lah /dev/disk/by-id/
+# - $ lsblk -o NAME,UUID,LABEL,MOUNTPOINTS
 #
 # type -- block device inf type:
 # - mdadm
@@ -35,8 +42,40 @@ alerk:
 disk:
   - define_type: "dev"
     disk: "/dev/sda"
+    name: "disk1_name"  # Will be displayed in the report
+    code: "disk1_code"  # Will be displayed in the messages. Make it the same as the "name" if you do not know why it is needed.
     type: "ata"
-    max_temp: 55  # Degrees Celsius
-    smart:
+    max_temp: "55"  # Degrees Celsius, "None" if no needed
+    smart_check:
       - attribute_num: 5
-        problem_if: ">0"
+        problem_if: "x>0"
+      - attribute_num: 197
+        problem_if: "x>0"
+      - attribute_num: 198
+        problem_if: "x>0"
+  - define_type: "by-id"
+    disk: "/dev/disk/by-id/type-manufacturer_model_serial"
+    name: "disk2_name"  # Will be displayed in the report
+    code: "disk2_code"  # Will be displayed in the messages. Make it the same as the "name" if you do not know why it is needed.
+    type: "sat"
+    max_temp: "55"  # Degrees Celsius, "None" if no needed
+    smart_check:
+      - attribute_num: 5
+        problem_if: "x>0"
+      - attribute_num: 197
+        problem_if: "x>0"
+      - attribute_num: 198
+        problem_if: "x>0"
+  - define_type: "uuid"
+    disk: "10f5e5ee-5544-3a88-a64a-43bb59777a8a"
+    name: "disk3_name"  # Will be displayed in the report
+    code: "disk3_code"  # Will be displayed in the messages. Make it the same as the "name" if you do not know why it is needed.
+    type: "nvme"
+    max_temp: "None"  # Degrees Celsius, "None" if no needed
+    smart_check:
+      - attribute_num: 5
+        problem_if: "x>0"
+      - attribute_num: 197
+        problem_if: "x>0"
+      - attribute_num: 198
+        problem_if: "x>0"
