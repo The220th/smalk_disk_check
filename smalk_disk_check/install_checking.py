@@ -4,6 +4,7 @@ import subprocess
 import os
 
 def sys_check_program(program):
+    # shutil.which ???
     try:
         subprocess.run([program, '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         return True
@@ -29,6 +30,7 @@ def install_check_and_root_check():
         "mdadm": "mdadm",
         "smartctl": "smartmontools",
         "hddtemp": "hddtemp",
+        "hdparm": "hdparm"
         # "sensors": "lm-sensors",
     }
 
