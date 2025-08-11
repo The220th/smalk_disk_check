@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import time
 
+
 class TempHandler:
 
     @staticmethod
@@ -36,7 +37,8 @@ class TempHandler:
         try:
             output = run_hddtemp()
 
-            if "is sleeping" in output.lower():
+            if "is sleeping" in output.lower():  # sudo hdparm -Y /dev/sda
+                # print(f"Device {dev} is sleeping. Trying to wake up... ")
                 if wake_disk():
                     time.sleep(5)
                     output = run_hddtemp()

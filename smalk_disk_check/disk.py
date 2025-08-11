@@ -9,6 +9,7 @@ from ksupk import singleton_decorator
 
 from smalk_disk_check.setting_manager import SettingManager
 from smalk_disk_check.smart_handler import SMARTHandler
+from smalk_disk_check.mdadm_handler import MDADMHandler
 from smalk_disk_check.temp_handler import TempHandler
 
 
@@ -55,6 +56,66 @@ class Disk:
         self.max_temp: int | None = max_temp
         self.smart_attr_to_check = smart_attr_to_check
 
+    def check(self) -> tuple[bool, str]:
+        if not self.check_if_in_system():
+            return False, f"No such file: \"{self.get_dev_path()}\". "
+        if not self.try_read():
+            return False, f"Cannot read device \"{self.get_dev_path()}\". "
+        problem, res = False, ""
+        if self.get_max_temp() is not None and not self.is_mdadm():
+            t = self.get_temp()
+            if t is None:
+                problem = True
+                res += f"Cannot get temperature of device \"{self.get_dev_path()}\". \n"
+            if t is not None and t > self.get_max_temp():
+                problem = True
+                res += f"Temperature of disk is too high: t={t}°C > max={self.get_max_temp()}°C. \n"
+        if not self.is_mdadm():
+            smart_table = self.get_smart_table()
+            if smart_table is None:
+                problem = True
+                res += f"Cannot get S.M.A.R.T. from device \"{self.get_dev_path()}\". \n"
+            try:
+                f, o = self.check_smart_attributes(smart_table)
+                if not f:
+                    problem = True
+                    res += f"Problem with S.M.A.R.T.: \n{o} \n"
+                    res += f"smartctl -a {self.get_dev_path()}: \n {SMARTHandler.get_smart_a_of(self.get_dev_path(), self.get_disk_type())} \n"
+            except Exception as e:
+                problem = True
+                res += f"Error while checking S.M.A.R.T.: {e}. \n"
+        else:
+            mdadm_check_f, mdadm_check_m = MDADMHandler.check_detail(self.get_dev_path())
+            if not mdadm_check_f:
+                problem = True
+                res += f"Problem with RAID: \n {mdadm_check_m} \n"
+                res += f"mdadm full report: \n {MDADMHandler.get_full_report(self.get_dev_path())} \n"
+
+        return not problem, res
+
+    def get_report(self) -> str:
+        res = ""
+        if not self.check_if_in_system():
+            res += f"No such file: \"{self.get_dev_path()}\". \n"
+        if not self.try_read():
+            res +=  f"Cannot read device \"{self.get_dev_path()}\". \n"
+
+        if self.get_max_temp() is not None and not self.is_mdadm():
+            t = self.get_temp()
+            if t is None:
+                res += f"Cannot get temperature of device \"{self.get_dev_path()}\". \n"
+            else:
+                res += f"Temperature of {self.get_dev_path()} is {t}°C (max={self.get_max_temp()}°C). \n"
+            if t is not None and t > self.get_max_temp():
+                res += f"Temperature of disk is too high: t={t}°C > max={self.get_max_temp()}°C. \n"
+
+        if not self.is_mdadm():
+            res += f"\n\nsmartctl -a {self.get_dev_path()}: \n {SMARTHandler.get_smart_a_of(self.get_dev_path(), self.get_disk_type())} \n"
+        else:
+            res += f"\n\nmdadm full report: \n {MDADMHandler.get_full_report(self.get_dev_path())} \n"
+
+        return res
+
     def get_name(self) -> str:
         return self.name
 
@@ -100,10 +161,10 @@ class Disk:
         res_str = ""
         for attr_num in self.smart_attr_to_check:
             if attr_num not in smart_table:
-                raise RuntimeError(f"Cannot find attribute {attr_num} in S.M.A.R.T.")
+                raise RuntimeError(f"Cannot find attribute {attr_num} in S.M.A.R.T. ")
             value = smart_table[attr_num]
             if not self.smart_attr_to_check[attr_num](value):
-                res_str += f"S.M.A.R.T. is not passed. Attribute {attr_num} check fail. Attribute {attr_num} is \"{smart_table[attr_num]}\". "
+                res_str += f"S.M.A.R.T. is not passed. Attribute {attr_num} check fail. Attribute {attr_num} is \"{smart_table[attr_num]}\". \n"
 
         if res_str == "":
             return True, res_str
