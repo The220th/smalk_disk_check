@@ -21,14 +21,36 @@ class MDADMHandler:
             )
             output = result.stdout
 
-            if "State :" in output:
-                state_line = [line for line in output.split('\n') if "State :" in line][0]
-                state = state_line.split(":")[1].strip()
-
-                if "clean" in state.lower() or "active" in state.lower():
+            """
+            Основные возможные состояния (State):
+                clean – OK.
+                active – OK.
+                degraded – work, but there are failed disks.
+                resyncing – sync.
+                recovering – recover.
+                reshape – change raid, or size, or number of disks.
+                checking – check raid consistency.
+                faulty – fail.
+                inactive – stopped.
+            """
+            if "State :" in output and "Failed Devices :" in output:
+                state_line = [line for line in output.split('\n') if "State :" in line]
+                fail_line = [line for line in output.split('\n') if "Failed Devices :" in line]
+                if len(state_line) != 1 or len(fail_line) != 1:
+                    return False, f"Cannot understand state of \"{dev}\""
+                state_line, fail_line = state_line[0], fail_line[0]
+                state = state_line.split(":")[1].strip().lower()
+                fails_num = int(fail_line.split(":")[1].strip())
+                res_text, all_ok = "", True
+                if "faulty" in state or "inactive" in state or "degraded" in state:
+                    res_text += f"Problem with RAID {dev}! State: {state}. \n"
+                    all_ok = False
+                if fails_num > 0:
+                    res_text += f"Problem with RAID {dev}! Failed Devices: {fails_num}. \n"
+                if all_ok:
                     return True, ""
                 else:
-                    return False, f"Problem with RAID {dev}! State: {state}. "
+                    return False, res_text
             else:
                 return False, f"Cannot understand state of \"{dev}\""
 

@@ -51,14 +51,16 @@ class Kommunicator:
 
     def __run(self):
         while True:
+            msg_tuple = self.task_queue.get()
             try:
-                    msg_tuple = self.task_queue.get()
                     msg_wrapper: MessageWrapper = msg_tuple[0]
                     raws: list[tuple[str, bytes]] | None = msg_tuple[1]
                     self.__send_message(msg_wrapper, raws)
             except Exception as e:
                 error_text = f"{traceback.format_exc()}\n{e}"
                 print(error_text)
+                self.add_msg(msg_tuple[0], msg_tuple[1])
+                time.sleep(30)
             finally:
                 self.task_queue.task_done()
 

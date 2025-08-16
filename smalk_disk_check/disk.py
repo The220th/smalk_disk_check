@@ -46,7 +46,7 @@ def get_lsblk_info() -> list[dict[str: str]]:
 
 class Disk:
     def __init__(self, name: str, code: str, dev_path: Path, disk_type: str, max_temp: int | None,
-                 smart_attr_to_check: dict[int | str: Callable[[int], bool] | str]):
+                 smart_attr_to_check: dict[int | str: Callable[[int], bool] | str] | None):
         self.name: str = name
         self.code: str = code
         self.dev_path: Path = dev_path
@@ -97,8 +97,8 @@ class Disk:
             mdadm_check_f, mdadm_check_m = MDADMHandler.check_detail(self.get_dev_path())
             if not mdadm_check_f:
                 problem = True
-                res += f"Problem with RAID: \n {mdadm_check_m} \n"
-                res += f"mdadm full report: \n {MDADMHandler.get_full_report(self.get_dev_path())} \n"
+                res += f"Problem with RAID: \n{mdadm_check_m} \n"
+                res += f"mdadm full report: \n{MDADMHandler.get_full_report(self.get_dev_path())} \n"
 
         if problem:
             res = f"{str(self)} \n" + res
@@ -125,13 +125,13 @@ class Disk:
             res += f"\n\nsmartctl -a {self.get_dev_path()}: \n {SMARTHandler.get_smart_a_of(self.get_dev_path(), self.get_disk_type())} \n"
             buffs, _smart_table = "", self.get_smart_table()
             if _smart_table is not None:
-                for attr, val in _smart_table:
+                for attr, val in _smart_table.items():
                     buffs += f"{attr} --- {val}\n"
             else:
                 buffs = f"{_smart_table}"
             res += f"smart table: \n{buffs} \n"
         else:
-            res += f"\n\nmdadm full report: \n {MDADMHandler.get_full_report(self.get_dev_path())} \n"
+            res += f"\n\nmdadm full report: \n{MDADMHandler.get_full_report(self.get_dev_path())} \n"
 
         return res
 
@@ -217,11 +217,12 @@ class Disk:
 
     def __str__(self):
         smart_attr_to_check = {}
-        for k_i in self.smart_attr_to_check:
-            if isinstance(k_i, str):
-                smart_attr_to_check[k_i] = smart_attr_to_check[k_i]
-            else:
-                continue
+        if not self.is_mdadm():
+            for k_i in self.smart_attr_to_check:
+                if isinstance(k_i, str):
+                    smart_attr_to_check[k_i] = smart_attr_to_check[k_i]
+                else:
+                    continue
         return (f"Disk(name={self.name}, code={self.code}, dev_path={self.dev_path}), disk_type={self.disk_type}, is_mdadm={self.mdadm}, "
                 f"max_temp={self.max_temp}, smart_attr_to_check={smart_attr_to_check})")
 
@@ -257,13 +258,16 @@ class DiskManager:
             else:
                 raise ValueError(f"Cannot understand \"max_temp\"=\"{disk_i['max_temp']}\" of disk {disk_name}")
 
-            smarts = disk_i["smart_check"]
-            smart_attr_to_check: dict[int | str: Callable[[int], bool] | str] = {}
-            for smart_i in smarts:
-                attr_num: int = int(smart_i["attribute_num"])
-                condition: str = smart_i["problem_if"]
-                smart_attr_to_check[attr_num] = eval(f"lambda x: {condition}")
-                smart_attr_to_check[str(attr_num)] = condition
+            if disk_type != "mdadm":
+                smarts = disk_i["smart_check"]
+                smart_attr_to_check: dict[int | str: Callable[[int], bool] | str] = {}
+                for smart_i in smarts:
+                    attr_num: int = int(smart_i["attribute_num"])
+                    condition: str = smart_i["problem_if"]
+                    smart_attr_to_check[attr_num] = eval(f"lambda x: {condition}")
+                    smart_attr_to_check[str(attr_num)] = condition
+            else:
+                smart_attr_to_check = None
             disk = Disk(name=disk_name, code=disk_code, dev_path=dev_path, disk_type=disk_type, max_temp=max_temp,
                         smart_attr_to_check=smart_attr_to_check)
             self.disks.append(disk)
@@ -290,20 +294,21 @@ class DiskManager:
             raise ValueError(f"\"type\" not defined for disk \"{name}\" ({code}). ")
         if "max_temp" not in disk_record:
             raise ValueError(f"\"max_temp\" not defined for disk \"{name}\" ({code}). ")
-        if "smart_check" not in disk_record:
+        if disk_record["type"] != "mdadm" and "smart_check" not in disk_record:
             raise ValueError(f"\"smart_check\" not defined for disk \"{name}\" ({code}). ")
-        smarts = disk_record["smart_check"]
-        for smart_i in smarts:
-            if "attribute_num" not in smart_i:
-                raise ValueError(f"\"attribute_num\" not defined: {smart_i}. Disk \"{name}\" ({code}). ")
-            if not isinstance(smart_i["attribute_num"], int):
-                raise ValueError(f"\"attribute_num\" must be int, not {type(smart_i['attribute_num'])}. Disk \"{name}\" ({code}). ")
-            if "problem_if" not in smart_i:
-                raise ValueError(f"\"problem_if\" not defined: {smart_i}. Disk \"{name}\" ({code}). ")
-            if not isinstance(smart_i["problem_if"], str):
-                raise ValueError(f"\"problem_if\" must be int, not {type(smart_i['problem_if'])}. Disk \"{name}\" ({code}). ")
-            if not is_valid_attribute_check_condition(smart_i["problem_if"]):
-                raise ValueError(f"\"problem_if\" contains wrong condition: \"{smart_i['problem_if']}\". Disk \"{name}\" ({code}). ")
+        if disk_record["type"] != "mdadm":
+            smarts = disk_record["smart_check"]
+            for smart_i in smarts:
+                if "attribute_num" not in smart_i:
+                    raise ValueError(f"\"attribute_num\" not defined: {smart_i}. Disk \"{name}\" ({code}). ")
+                if not isinstance(smart_i["attribute_num"], int):
+                    raise ValueError(f"\"attribute_num\" must be int, not {type(smart_i['attribute_num'])}. Disk \"{name}\" ({code}). ")
+                if "problem_if" not in smart_i:
+                    raise ValueError(f"\"problem_if\" not defined: {smart_i}. Disk \"{name}\" ({code}). ")
+                if not isinstance(smart_i["problem_if"], str):
+                    raise ValueError(f"\"problem_if\" must be int, not {type(smart_i['problem_if'])}. Disk \"{name}\" ({code}). ")
+                if not is_valid_attribute_check_condition(smart_i["problem_if"]):
+                    raise ValueError(f"\"problem_if\" contains wrong condition: \"{smart_i['problem_if']}\". Disk \"{name}\" ({code}). ")
 
     def _check_define_dev(self, path: str, disk_name: str) -> Path:
         # pattern = r'^/dev/sd[a-z]$'  # nvme? mdX? scsi?
