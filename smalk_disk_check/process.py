@@ -4,9 +4,9 @@ import time
 import traceback
 import datetime
 from alerk_pack.message import MessageWrapper
+from alerk_pack.communicator import Kommunicator
 
 from smalk_disk_check.setting_manager import SettingManager
-from smalk_disk_check.communicator import Kommunicator
 from smalk_disk_check.disk import DiskManager, Disk
 
 
@@ -75,15 +75,18 @@ def test_start(disks: list[Disk]):
         if if_problem:
             print("Cannot test check disks. Is all settings correct? ")
             print(f"Problems disks: {problem_disk_code_list}, text: \n{problem_text}")
-            user_input_orig = input("Press Enter to exit or type \"continue\" to continue: ")
-            user_input = user_input_orig.strip().lower()
-            if user_input == "":
-                exit(1)
-            elif user_input == "continue":
-                return
+            if SettingManager().get_interactive():
+                user_input_orig = input("Press Enter to exit or type \"continue\" to continue: ")
+                user_input = user_input_orig.strip().lower()
+                if user_input == "":
+                    exit(1)
+                elif user_input == "continue":
+                    return
+                else:
+                    print(f"Cannot understand \"{user_input_orig}\". Exit.")
+                    exit(1)
             else:
-                print(f"Cannot understand \"{user_input_orig}\". Exit.")
-                exit(1)
+                return
 
         full_disk_report(disks)
     except Exception as e:

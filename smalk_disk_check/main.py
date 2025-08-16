@@ -2,7 +2,7 @@
 
 import platform
 import sys
-import time
+from alerk_pack.communicator import Kommunicator
 
 from smalk_disk_check.install_checking import install_check_and_root_check
 from smalk_disk_check.args_parsing import get_args
@@ -10,17 +10,18 @@ from smalk_disk_check.setting_manager import SettingManager
 from smalk_disk_check.disk import DiskManager
 from smalk_disk_check.key_manager import KeyManager
 from smalk_disk_check.process import main_loop
-from smalk_disk_check.communicator import Kommunicator
 
 
 def main():
     if platform.system().lower() != "linux":
         print("smalk_disk_check can run only on GNU/Linux.")
         sys.exit(1)
-    install_check_and_root_check()
 
     args = get_args()
     sm = SettingManager(args.settings_path)
+
+    install_check_and_root_check()
+
     disk_manager = DiskManager(sm=sm)
     km = KeyManager(sm=sm)
     kommunicator = Kommunicator(url=sm.get_url(),

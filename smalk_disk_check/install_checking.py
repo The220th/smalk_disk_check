@@ -3,6 +3,9 @@
 import subprocess
 import os
 
+from smalk_disk_check.setting_manager import SettingManager
+
+
 def sys_check_program(program):
     # shutil.which ???
     try:
@@ -38,8 +41,13 @@ def install_check_and_root_check():
     f = False
     for program, package in programs.items():
         if not sys_check_program(program):
-            f = True
-            print(f"\"{program}\" is not installed. Try to install it with package: \"{package}\". ")
+            if program != "hddtemp":
+                f = True
+                print(f"\"{program}\" is not installed. Try to install it with package: \"{package}\". ")
+            else:
+                print(f"\"{program}\" is not installed. Try to install it with package: \"{package}\". smalk_disk_check can run without hddtemp, but you must check it first with tests. ")
+                if SettingManager().get_interactive():
+                    input("Press Enter to continue")
 
     if f:
         print("Be sure, what all of these utils installed on your system: lsblk, mdadm, smartctl, hddtemp -- and rerun. ")

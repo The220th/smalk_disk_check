@@ -62,3 +62,6 @@ class SettingManager:
 
     def get_full_report_message(self) -> str:
         return self.data["app"]["full_report_message"]
+
+    def get_interactive(self) -> bool:
+        return self.data["app"]["interactive"]

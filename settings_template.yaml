@@ -1,4 +1,7 @@
 app:
+  # Turn off interactive to set False. It needs if it runs as daemon
+  interactive: True
+
   # Send message, if app tuned on
   notify_if_turned_on: True
 

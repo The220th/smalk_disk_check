@@ -24,6 +24,8 @@ class TempHandler:
                 return result_l.stdout.strip()
             except subprocess.CalledProcessError:
                 return None
+            except Exception as e:
+                return None
 
         def wake_disk() -> bool:
             try:
