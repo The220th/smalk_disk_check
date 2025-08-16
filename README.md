@@ -33,10 +33,11 @@ smalk_disk_check /path/to/settings.yaml
 # Run it with startup
 
 Create script `smalk_disk_check.sh` (as root):
+
 ```bash
 #!/bin/bash
 SCRIPT_DIR_PATH=$(dirname "$0")
-VENV_PATH="SCRIPT_DIR_PATH/venv"
+VENV_PATH="$SCRIPT_DIR_PATH/venv"
 
 if [ ! -d "$VENV_PATH" ]; then
     python3 -m venv "$VENV_PATH"
@@ -65,6 +66,6 @@ sudo crontab -e  # sudo pacman -S cronie or sudo apt install cronie
 @reboot sleep 30 && /path/to/smalk_disk_check.sh
 ```
 
-And reboot to test.
+And reboot to test. Do not forget change `app.interactive` to `False` in `/path/to/settings.yaml`.
 
 Or do it as systemd service.
