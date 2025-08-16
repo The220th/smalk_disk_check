@@ -9,7 +9,7 @@ class SMARTHandler:
     @staticmethod
     def get_smart_table(dev: str | Path, dev_type: str | None) -> dict[int: int]:
         dev = str(dev)
-        if dev_type is not None:
+        if dev_type is None:
             smart = Device(dev)
         else:
             smart = Device(dev, interface=dev_type)
@@ -19,8 +19,9 @@ class SMARTHandler:
         smart_dict: dict[int: int] = {}
 
         for attribute in smart_attributes:
-            # smart_dict[attribute.num] = str(attribute.raw)
-            smart_dict[attribute.num] = attribute.raw_int
+            if attribute is not None:
+                # smart_dict[attribute.num] = str(attribute.raw)
+                smart_dict[attribute.num] = attribute.raw_int
 
         return smart_dict
 

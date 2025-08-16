@@ -8,7 +8,25 @@ app:
   # How often to compile and send a full report on disks
   full_report_period: 604800  # 86400 -- one day, 604800 -- one week, 2592000 -- one month
 
-  cipher_key: "{YOUR_CIPHER_KEY}"  # empty if no needed to encrypt reports (you can use GUI to decrypt/test: https://github.com/The220th/krypto_gui_smalk)
+  cipher_key: "{YOUR_CIPHER_KEY}"  # empty ("") if no needed to encrypt reports (you can use GUI to decrypt/test: https://github.com/The220th/krypto_gui_smalk)
+
+  prefix_message: "Message for alerk begin with it."
+
+  startup_message: "Message for alerk if turned on."
+
+  problem_message: "Message for alerk if problem."
+
+  full_report_message: "Message for alerk if full report."
+
+
+alerk:
+  ip: "192.168.0.1"
+  port: 8000
+  endpoint: "/endpoint"
+  protocol: "http"  # http or https
+  pub_key: "alerk_pub_key"
+  verify_key: "alerk_verify_key"
+
 
 keys:
   priv_key: "smalk_priv_key"  # private part (alerk gen_keys)
@@ -16,12 +34,6 @@ keys:
   sign_key: "smalk_sigh_key"  # private part (alerk gen_keys)
   verify_key: "smalk_verify_key"  # public part (alerk gen_keys)
 
-alerk:
-  pub_key: "alerk_pub_key"
-  verify_key: "alerk_verify_key"
-  ip: "192.168.0.1"
-  port: 8000
-  endpoint: "/endpoint"
 
 #
 # define_type -- de way to find device:
@@ -29,7 +41,7 @@ alerk:
 # - "by-id": path like type-manufacturer_model_serial. The "disk" like "/dev/disk/by-id/type-manufacturer_model_serial"
 # - "uuid": uuid of any partition on disk. Then "disk" like "10f5e5ee-5544-3a88-a64a-43bb59777a8a". Make sure volumes are unique.
 # You can look it with commands:
-# - $ ls -lah /dev
+# - $ sudo fdisk -l  # (ls -lah /dev)
 # - $ ls -lah /dev/disk/by-id/
 # - $ lsblk -o NAME,UUID,LABEL,MOUNTPOINTS
 #

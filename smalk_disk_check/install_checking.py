@@ -9,7 +9,8 @@ def sys_check_program(program):
         subprocess.run([program, '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         return True
     except subprocess.CalledProcessError:
-        return False
+        print(f"WARNING: command \"{program} --version\" exited with error, but \"{program}\" installed. ")
+        return True
     except FileNotFoundError:
         return False
 
