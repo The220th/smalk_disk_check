@@ -11,7 +11,7 @@ from ksupk import singleton_decorator
 from smalk_disk_check.setting_manager import SettingManager
 from smalk_disk_check.smart_handler import SMARTHandler
 from smalk_disk_check.mdadm_handler import MDADMHandler
-from smalk_disk_check.temp_handler import TempHandler
+# from smalk_disk_check.temp_handler import TempHandler
 
 
 def is_valid_attribute_check_condition(condition: str) -> bool:
@@ -142,7 +142,8 @@ class Disk:
         return self.code
 
     def get_temp(self) -> int | None:
-        tmp1 = TempHandler.get_temp(self.get_dev_path())
+        # tmp1 = TempHandler.get_temp(self.get_dev_path())
+        tmp1 = None
         if tmp1 is None:
             tmp2 = SMARTHandler.try_get_temperature(self.get_dev_path(), self.get_disk_type())
             # assert tmp1 == tmp2

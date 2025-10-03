@@ -33,8 +33,8 @@ def install_check_and_root_check():
         "lsblk": "util-linux",
         "mdadm": "mdadm",
         "smartctl": "smartmontools",
-        "hddtemp": "hddtemp",
-        "hdparm": "hdparm"
+        # "hddtemp": "hddtemp",
+        # "hdparm": "hdparm"
         # "sensors": "lm-sensors",
     }
 

@@ -10,9 +10,9 @@
 Install packages:
 
 ```bash
-sudo apt update && sudo apt install util-linux mdadm smartmontools hddtemp hdparm  # Debian-like
+sudo apt update && sudo apt install util-linux mdadm smartmontools  # Debian-like
 # or
-sudo pacman -Sy util-linux mdadm smartmontools hddtemp hdparm  # Arch
+sudo pacman -Sy util-linux mdadm smartmontools  # Arch
 ```
 
 Install form pip:
@@ -66,6 +66,6 @@ sudo crontab -e  # sudo pacman -S cronie or sudo apt install cronie
 @reboot sleep 30 && /path/to/smalk_disk_check.sh
 ```
 
-And reboot to test. Do not forget change `app.interactive` to `False` in `/path/to/settings.yaml`.
+And reboot to test. **Do not forget** change `app.interactive` to `False` in `/path/to/settings.yaml`.
 
 Or do it as systemd service.

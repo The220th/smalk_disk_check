@@ -64,6 +64,8 @@ disk:
     smart_check:
       - attribute_num: 5
         problem_if: "x>0"
+      - attribute_num: 196
+        problem_if: "x>0"
       - attribute_num: 197
         problem_if: "x>0"
       - attribute_num: 198
@@ -77,6 +79,8 @@ disk:
     smart_check:
       - attribute_num: 5
         problem_if: "x>0"
+      - attribute_num: 196
+        problem_if: "x>0"
       - attribute_num: 197
         problem_if: "x>0"
       - attribute_num: 198
@@ -89,6 +93,8 @@ disk:
     max_temp: "None"  # Degrees Celsius, "None" if no needed
     smart_check:
       - attribute_num: 5
+        problem_if: "x>0"
+      - attribute_num: 196
         problem_if: "x>0"
       - attribute_num: 197
         problem_if: "x>0"
