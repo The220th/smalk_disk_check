@@ -47,7 +47,8 @@ class SMARTHandler:
         else:
             cmd = ["smartctl", "-a", dev]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            # result = subprocess.run(cmd, capture_output=True, text=True, check=True)  # if exit code is 64 is okay?
+            result = subprocess.run(cmd, capture_output=True, text=True)
             return result.stdout
         except subprocess.CalledProcessError as e:
             raise ValueError(f"Cannot run cmd {cmd}: {e.stderr}")
